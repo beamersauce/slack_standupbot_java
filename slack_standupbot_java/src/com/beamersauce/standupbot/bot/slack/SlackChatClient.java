@@ -18,7 +18,7 @@ public class SlackChatClient implements IChatClient {
 	public SlackChatClient(ICommandManager command_manager, final String auth_token) {		
 		slack_session = SlackSessionFactory.createWebSocketSlackSession(auth_token);
 		//TODO not a great idea to tie these 2 services together
-		slack_listener = new SlackMessagePostedListenerImpl(command_manager, this);		
+		slack_listener = new DefaultSlackMessagePostedListener(command_manager, this);		
 		slack_session.addMessagePostedListener(slack_listener);
 		try {
 			slack_session.connect();

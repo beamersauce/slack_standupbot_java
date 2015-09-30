@@ -6,7 +6,7 @@ import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IDataManager;
 import com.beamersauce.standupbot.bot.IUser;
 
-public class StandupBot implements IBot {
+public class DefaultBot implements IBot {
 	
 	private IChatClient chat_client;
 	private ICommandManager command_manager; 

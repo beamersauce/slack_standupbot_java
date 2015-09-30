@@ -8,11 +8,11 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
 
-public class SlackMessagePostedListenerImpl implements SlackMessagePostedListener {
+public class DefaultSlackMessagePostedListener implements SlackMessagePostedListener {
 	private final ICommandManager command_manager;
 	private final IChatClient chat_client;
 	
-	public SlackMessagePostedListenerImpl(
+	public DefaultSlackMessagePostedListener(
 			ICommandManager command_manager,
 			IChatClient chat_client) {
 		this.command_manager = command_manager;

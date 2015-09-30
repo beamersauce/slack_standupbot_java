@@ -6,11 +6,9 @@ import java.util.Properties;
 import com.beamersauce.standupbot.bot.IBot;
 import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IDataManager;
-import com.beamersauce.standupbot.bot.IUser;
 import com.beamersauce.standupbot.bot.slack.CommandManager;
-import com.beamersauce.standupbot.bot.slack.DefaultUser;
 import com.beamersauce.standupbot.bot.slack.SlackChatClient;
-import com.beamersauce.standupbot.bot.slack.StandupBot;
+import com.beamersauce.standupbot.bot.slack.DefaultBot;
 
 public class App {
 
@@ -26,7 +24,7 @@ public class App {
 		final String auth_token = props.getProperty("slack.auth_token");
 		
 		//startup bot
-		final IBot bot = new StandupBot();
+		final IBot bot = new DefaultBot();
 		final ICommandManager command_manager = new CommandManager();
 		final IDataManager data_manager = null;		
 		bot.start(new SlackChatClient(command_manager, auth_token), command_manager, data_manager);

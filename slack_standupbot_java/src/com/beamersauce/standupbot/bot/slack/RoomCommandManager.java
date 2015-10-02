@@ -8,6 +8,7 @@ import java.util.Set;
 import com.beamersauce.standupbot.bot.IChatClient;
 import com.beamersauce.standupbot.bot.ICommand;
 import com.beamersauce.standupbot.bot.ICommandManager;
+import com.beamersauce.standupbot.bot.IDataManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
 import com.beamersauce.standupbot.commands.DisplayCommand;
@@ -20,12 +21,14 @@ public class RoomCommandManager {
 	private Set<ICommand> all_commands = new HashSet<ICommand>();
 	private Set<ICommand> full_stream_commands = new HashSet<ICommand>();
 	private Map<String, ICommand> trigger_commands = new HashMap<String, ICommand>();
+	private final IDataManager data_manager;
 	
-	public RoomCommandManager(IRoom room, IChatClient chat_client, ICommandManager command_manager) {
+	public RoomCommandManager(IRoom room, IChatClient chat_client, ICommandManager command_manager, IDataManager data_manager) {
 		System.out.println("Starting room manager for room: " + room.name());
 		this.room = room;
 		this.chat_client = chat_client;
 		this.command_manager = command_manager;
+		this.data_manager = data_manager;
 		initCommands();
 	}
 	
@@ -58,4 +61,6 @@ public class RoomCommandManager {
 				.forEach(command -> command.onNewMessage(command_manager, room, user, message));
 		}
 	}
+	
+	public IDataManager data_manager() { return this.data_manager; }
 }

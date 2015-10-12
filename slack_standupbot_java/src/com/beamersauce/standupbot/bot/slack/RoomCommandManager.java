@@ -12,6 +12,7 @@ import com.beamersauce.standupbot.bot.IDataManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
 import com.beamersauce.standupbot.commands.DisplayCommand;
+import com.beamersauce.standupbot.commands.EchoCommand;
 
 public class RoomCommandManager {
 	private static final String BOT_TRIGGER_WORD = "standup";
@@ -34,16 +35,22 @@ public class RoomCommandManager {
 	
 	private void initCommands() {
 		//TODO handle this via some settings file, also only turn on
-		//commands w/ settings from the save file?
-		ICommand command_display = new DisplayCommand();
-		all_commands.add(command_display);
-		//TODO check enabled
-		if ( command_display.receive_full_chat_stream())
-			full_stream_commands.add(command_display);
-		//TODO actually check we have a trigger word, and throw error is 2 things use the same trigger word
-		if ( command_display.trigger_word() != null && 
-				!command_display.trigger_word().isEmpty())
-			trigger_commands.put(command_display.trigger_word().toLowerCase(), command_display);
+		//commands w/ settings from the save file?		
+		addCommand(new DisplayCommand());
+		addCommand(new EchoCommand());
+	}
+	
+	private void addCommand(ICommand command) {
+		all_commands.add(command);
+		//TODO check enabled (probably need to check enabled in onReceiveMessage actually)
+		if ( command.receive_full_chat_stream())
+			full_stream_commands.add(command);
+		//TODO actually check we have a trigger word, and throw error if 2 things use the same trigger word
+		if ( command.trigger_word() != null && 
+				!command.trigger_word().isEmpty()) {
+			System.out.println("Added trigger word: " + command.trigger_word().toLowerCase());
+			trigger_commands.put(command.trigger_word().toLowerCase(), command);
+		}
 	}
 
 	public void onReceiveMessage(IUser user, IRoom room, String message) {

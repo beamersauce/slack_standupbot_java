@@ -1,6 +1,9 @@
 package com.beamersauce.standupbot.bot;
 
+import java.util.Optional;
+
 public interface ICommand {
+	public String id();
 	public String trigger_word();
 	public boolean enabled();
 	public boolean receive_full_chat_stream();
@@ -12,7 +15,7 @@ public interface ICommand {
 	 * Returns a status message for the command
 	 * @return
 	 */
-	public String display_message();
+	public Optional<String> display_message();
 	/**
 	 * Returns back how to use the command
 	 * @return

@@ -1,5 +1,7 @@
 package com.beamersauce.standupbot.commands;
 
+import java.util.Optional;
+
 import com.beamersauce.standupbot.bot.ICommand;
 import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IRoom;
@@ -7,7 +9,13 @@ import com.beamersauce.standupbot.bot.IUser;
 
 public class DisplayCommand implements ICommand {
 
+	private static final String id = "display";
 	private boolean enabled = true;
+	
+	@Override
+	public String id() {
+		return id;
+	}
 	
 	@Override
 	public String trigger_word() {
@@ -26,8 +34,8 @@ public class DisplayCommand implements ICommand {
 	}
 
 	@Override
-	public String display_message() {
-		return null;
+	public Optional<String> display_message() {
+		return Optional.empty();
 	}
 
 	@Override

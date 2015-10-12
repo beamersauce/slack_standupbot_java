@@ -18,31 +18,13 @@ public class CommandManager implements ICommandManager {
 	private IChatClient chat_client;
 	private IBot bot;
 	private Map<String, RoomCommandManager> room_managers = new HashMap<String, RoomCommandManager>();
-	
+	private IDataManager data_manager;
 	
 	@Override
-	public void start(IBot bot, IChatClient chat_client) {
+	public void start(IBot bot, IChatClient chat_client, IDataManager data_manager) {
 		this.chat_client = chat_client;
 		this.bot = bot;
-		initAllCommands();
-	}
-	
-	/**
-	 * TODO read these from some config file or something
-	 * 
-	 */
-	private void initAllCommands() {
-		//NOTE I handle this in RoomCommandManager now
-		
-//		ICommand command_display = new DisplayCommand();
-//		all_commands.add(command_display);
-//		//TODO check enabled
-//		if ( command_display.receive_full_chat_stream())
-//			full_stream_commands.add(command_display);
-//		//TODO actually check we have a trigger word, and throw error is 2 things use the same trigger word
-//		if ( command_display.trigger_word() != null && 
-//				!command_display.trigger_word().isEmpty())
-//			trigger_commands.put(command_display.trigger_word().toLowerCase(), command_display);
+		this.data_manager = data_manager;
 	}
 
 	@Override
@@ -65,7 +47,8 @@ public class CommandManager implements ICommandManager {
 	private RoomCommandManager getOrCreateRoomManager(final IRoom room) {
 		if ( room_managers.containsKey(room.name()) )
 			return room_managers.get(room.name());
-		RoomCommandManager room_manager = new RoomCommandManager(room, chat_client, this);
+		//room manager didn't exist, create it		
+		RoomCommandManager room_manager = new RoomCommandManager(room, chat_client, this, data_manager);
 		room_managers.put(room.name(), room_manager);
 		return room_manager;
 		

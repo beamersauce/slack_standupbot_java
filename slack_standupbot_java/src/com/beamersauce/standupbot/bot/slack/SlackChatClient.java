@@ -61,11 +61,10 @@ public class SlackChatClient implements IChatClient {
 	}
 
 	@Override
-	public IUser findUser(String user_name) {
-		final SlackUser user = slack_session.findUserByUserName(user_name);
-		if ( user != null ) {
+	public IUser findUser(String user_name, String user_id) {		
+		final SlackUser user = user_name != null ? slack_session.findUserByUserName(user_name) : slack_session.findUserById(user_id);
+		if (user != null )
 			return new DefaultUser(user.getId(), user.getRealName(), user.getUserName());
-		}
 		return null;
 	}
 

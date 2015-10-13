@@ -13,5 +13,5 @@ public interface IChatClient {
 	 * @return
 	 */
 	public String createUserTag(IUser user);
-	public IUser findUser(String user_name);
+	public IUser findUser(String user_name, String user_id);
 }

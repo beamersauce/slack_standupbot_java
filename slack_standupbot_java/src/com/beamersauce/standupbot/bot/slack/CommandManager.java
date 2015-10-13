@@ -1,8 +1,8 @@
 package com.beamersauce.standupbot.bot.slack;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.beamersauce.standupbot.bot.IBot;
@@ -12,7 +12,6 @@ import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IDataManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
-import com.beamersauce.standupbot.commands.DisplayCommand;
 
 public class CommandManager implements ICommandManager {	
 	private IChatClient chat_client;
@@ -48,7 +47,7 @@ public class CommandManager implements ICommandManager {
 		if ( room_managers.containsKey(room.name()) )
 			return room_managers.get(room.name());
 		//room manager didn't exist, create it		
-		RoomCommandManager room_manager = new RoomCommandManager(room, chat_client, this, data_manager);
+		final RoomCommandManager room_manager = new RoomCommandManager(room, chat_client, this, data_manager);
 		room_managers.put(room.name(), room_manager);
 		return room_manager;
 		
@@ -63,6 +62,17 @@ public class CommandManager implements ICommandManager {
 	@Override
 	public IDataManager getDataManager(final IRoom room) {
 		return getOrCreateRoomManager(room).data_manager();
+	}
+
+	@Override
+	public Set<ICommand> getRoomCommands(IRoom room) {
+		final RoomCommandManager room_manager = getOrCreateRoomManager(room);
+		return room_manager.all_commands();
+	}
+
+	@Override
+	public Optional<IUser> findUser(String user_name, String user_id) {
+		return Optional.ofNullable(chat_client.findUser(user_name, user_id));
 	}
 
 	

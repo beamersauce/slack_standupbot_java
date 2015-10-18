@@ -37,7 +37,7 @@ public class DisplayCommand implements ICommand {
 	}
 
 	@Override
-	public Optional<String> display_message() {
+	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {
 		return Optional.empty();
 	}
 
@@ -53,9 +53,9 @@ public class DisplayCommand implements ICommand {
 		final StringBuilder sb = new StringBuilder("Standup Display");
 		Comparator<ICommand> comparator_id = (c1, c2) -> c1.id().compareTo(c2.id()); 
 		all_commands.stream().sorted(comparator_id).forEachOrdered(command -> {
-			if ( command.display_message().isPresent()) {
+			if ( command.display_message(command_manager, room).isPresent()) {
 				sb.append(System.lineSeparator()).append("[").append(command.id()).append("] - ");			
-				sb.append(command.display_message().get());							
+				sb.append(command.display_message(command_manager, room).get());							
 			}
 		});
 		//output message

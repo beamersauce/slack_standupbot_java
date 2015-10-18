@@ -15,10 +15,11 @@ public interface ICommand {
 	 * Returns a status message for the command
 	 * @return
 	 */
-	public Optional<String> display_message();
+	public Optional<String> display_message(ICommandManager command_manager, IRoom room);
 	/**
 	 * Returns back how to use the command
 	 * @return
 	 */
 	public String help_message();
+	
 }

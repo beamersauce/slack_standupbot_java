@@ -41,7 +41,7 @@ public class EchoCommand implements ICommand {
 	}
 
 	@Override
-	public Optional<String> display_message() {
+	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {
 		return Optional.of("triggered " + num_times_triggered + " times since last server restart");
 	}
 

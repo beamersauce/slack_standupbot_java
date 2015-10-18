@@ -52,7 +52,7 @@ public class HelpCommand implements ICommand {
 	}
 
 	@Override
-	public Optional<String> display_message() {
+	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {
 		return Optional.empty();
 	}
 

@@ -50,7 +50,7 @@ public class MeetingCommand implements ICommand {
 	}
 
 	@Override
-	public Optional<String> display_message() {
+	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {
 		final Optional<Date> next_meeting_time = getNextMeetingTime();
 		//TODO fix this
 		return Optional.of("[meeting] - Meetings are scheduled MTWRF at 9:30. This is a summary|normal room.  Next meeting is " + next_meeting_time.map(d -> d.toString()).orElse("never"));  		

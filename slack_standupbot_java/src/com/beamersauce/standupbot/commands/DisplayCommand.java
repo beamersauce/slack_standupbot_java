@@ -21,8 +21,8 @@ public class DisplayCommand implements ICommand {
 	}
 	
 	@Override
-	public String trigger_word() {
-		return "display";
+	public Optional<String> trigger_word() {
+		return Optional.of("display");
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class DisplayCommand implements ICommand {
 
 	@Override
 	public String help_message() {
-		return MessageUtils.createDefaultCommandHelpMessage(Optional.of(trigger_word()), new String[0], "displays status of all enabled commands");
+		return MessageUtils.createDefaultCommandHelpMessage(trigger_word(), new String[0], "displays status of all enabled commands");
 	}
 	
 	@Override
@@ -60,5 +60,11 @@ public class DisplayCommand implements ICommand {
 		});
 		//output message
 		command_manager.sendMessage(room, sb.toString());
+	}
+
+	@Override
+	public void intialize(ICommandManager command_manager, IRoom room) {
+		// TODO Auto-generated method stub
+		
 	}
 }

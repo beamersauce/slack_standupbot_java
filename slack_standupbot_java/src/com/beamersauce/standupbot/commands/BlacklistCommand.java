@@ -1,6 +1,9 @@
 package com.beamersauce.standupbot.commands;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -22,8 +25,8 @@ public class BlacklistCommand implements ICommand {
 	}
 
 	@Override
-	public String trigger_word() {
-		return "blacklist";
+	public Optional<String> trigger_word() {
+		return Optional.of("blacklist");
 	}
 
 	@Override
@@ -45,7 +48,7 @@ public class BlacklistCommand implements ICommand {
 			final Optional<IUser> found_user = command_manager.findUser(null, UserUtils.convertSlackUserTagToID(user_name));
 			if ( found_user.isPresent()) {
 				//TODO blacklist this user, or re-enable them - change output message to display what happened
-				final boolean wasBlacklisted = blacklistUser(room, command_manager.getDataManager(room), found_user.get().id());
+				final boolean wasBlacklisted = BlacklistCommand.blacklistUser(room, command_manager.getDataManager(room), found_user.get().id());
 				if ( wasBlacklisted )
 					command_manager.sendMessage(room, "[" + user_name + "] is now blacklisted");
 				else
@@ -56,33 +59,28 @@ public class BlacklistCommand implements ICommand {
 		} else {
 			command_manager.sendMessage(room, "error, inproperly formated: " + help_message());
 		}
-		String sub_message = message.substring(message.indexOf(this.trigger_word()) + this.trigger_word().length());
-		command_manager.sendMessage(room, "["+user.nickname()+"] said: " + sub_message );
 	}
 
 	@Override
 	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {
-		final Set<String> blacklist_ids = getCurrentBlacklist(room, command_manager.getDataManager(room));
-		final Set<String> blacklist_names = blacklist_ids.stream().map(id -> {
-			return command_manager.findUser(null, id).get().nickname();
-		}).collect(Collectors.toSet());
-		return Optional.of("Blacklisted users are: [" + blacklist_names.toString() + "]");
+		final Set<String> blacklist_ids = BlacklistCommand.getCurrentBlacklist(room, command_manager.getDataManager(room));
+		return Optional.of("Blacklisted users are: " + UserUtils.convertSetOfUserIDToNicknames(new HashSet<String>(blacklist_ids),command_manager,true).toString());
 	}
 
 	@Override
 	public String help_message() {
-		return MessageUtils.createDefaultCommandHelpMessage(Optional.of(trigger_word()), new String[]{"user_name"}, "disables or enables a user for participation in standup");
+		return MessageUtils.createDefaultCommandHelpMessage(trigger_word(), new String[]{"user_name"}, "disables or enables a user for participation in standup");
 	}
 	
 	/**
 	 * Returns the current list of blacklist users in the data entry
 	 */
 	@SuppressWarnings("unchecked")
-	private Set<String> getCurrentBlacklist(IRoom room, IDataManager data_manager) {
+	public static Set<String> getCurrentBlacklist(IRoom room, IDataManager data_manager) {
 		Map<String, Object> shared_room_data = data_manager.get_shared_room_data(room);
 		if ( shared_room_data.containsKey("blacklist") ) {
 			//TODO fix this?
-			return (Set<String>) shared_room_data.get("blacklist");
+			return ((Collection<String>) shared_room_data.get("blacklist")).stream().collect(Collectors.toSet());
 		} else {
 			return new HashSet<String>();
 		}
@@ -94,8 +92,8 @@ public class BlacklistCommand implements ICommand {
 	 * @param user_id
 	 * @return true if the user was blacklisted, false if the user was enabled
 	 */
-	private boolean blacklistUser(final IRoom room, final IDataManager data_manager, final String user_id) {
-		Set<String> blacklist_users = getCurrentBlacklist(room, data_manager);
+	private static boolean blacklistUser(final IRoom room, final IDataManager data_manager, final String user_id) {
+		Set<String> blacklist_users = BlacklistCommand.getCurrentBlacklist(room, data_manager);
 		//loop through removing the user if they are already a member of blacklisted set
 		if ( blacklist_users.stream().anyMatch(b -> b.equals(user_id)) ) {
 			blacklist_users.remove(user_id);
@@ -107,6 +105,12 @@ public class BlacklistCommand implements ICommand {
 			data_manager.set_shared_room_data(room, shared_room_data);
 			return true;
 		}
+	}
+
+	@Override
+	public void intialize(ICommandManager command_manager, IRoom room) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

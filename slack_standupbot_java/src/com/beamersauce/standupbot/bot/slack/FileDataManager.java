@@ -26,6 +26,7 @@ public class FileDataManager implements IDataManager {
 		if (file.createNewFile() ) {
 			//had to create a new file, so save object is empty, just create an empty one
 			data = new DefaultDataObject();
+			write_data_to_disk(); //immediately flush so we save a valid json file back
 		} else {
 			//file exists, hope it reads in correctly
 			data = mapper.readValue(file, DefaultDataObject.class);

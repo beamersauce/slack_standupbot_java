@@ -1,11 +1,15 @@
 package com.beamersauce.standupbot.bot.slack;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.beamersauce.standupbot.bot.IChatClient;
 import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
+import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
@@ -61,11 +65,23 @@ public class SlackChatClient implements IChatClient {
 	}
 
 	@Override
-	public IUser findUser(String user_name, String user_id) {		
+	public IUser findUser(String user_name, String user_id) {
 		final SlackUser user = user_name != null ? slack_session.findUserByUserName(user_name) : slack_session.findUserById(user_id);
 		if (user != null )
 			return new DefaultUser(user.getId(), user.getRealName(), user.getUserName());
 		return null;
 	}
+
+	@Override
+	public Set<IUser> getRoomUsers(IRoom room) {
+		final SlackChannel channel = slack_session.findChannelById(room.id());
+		if ( channel != null ) {
+			return channel.getMembers().stream().map(user -> {
+				return getUser(user.getId(), user.getRealName(), user.getUserName());
+			}).collect(Collectors.toSet());
+		}
+		return new HashSet<IUser>();
+	}
+	
 
 }

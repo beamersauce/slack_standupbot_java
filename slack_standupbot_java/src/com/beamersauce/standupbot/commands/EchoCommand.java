@@ -18,8 +18,8 @@ public class EchoCommand implements ICommand {
 	}
 
 	@Override
-	public String trigger_word() {
-		return "echo";
+	public Optional<String> trigger_word() {
+		return Optional.of("echo");
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class EchoCommand implements ICommand {
 	public void onNewMessage(ICommandManager command_manager, IRoom room,
 			IUser user, String message) {
 		num_times_triggered++;
-		String sub_message = message.substring(message.indexOf(this.trigger_word()) + this.trigger_word().length());
+		String sub_message = message.substring(message.indexOf(this.trigger_word().get()) + this.trigger_word().get().length());
 		command_manager.sendMessage(room, "["+user.nickname()+"] said: " + sub_message );
 	}
 
@@ -47,7 +47,13 @@ public class EchoCommand implements ICommand {
 
 	@Override
 	public String help_message() {
-		return MessageUtils.createDefaultCommandHelpMessage(Optional.of(trigger_word()), new String[0], "repeats anything you type back to you");
+		return MessageUtils.createDefaultCommandHelpMessage(trigger_word(), new String[0], "repeats anything you type back to you");
+	}
+
+	@Override
+	public void intialize(ICommandManager command_manager, IRoom room) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

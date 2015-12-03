@@ -11,4 +11,5 @@ public interface ICommandManager {
 	public IDataManager getDataManager(IRoom room);
 	public Set<ICommand> getRoomCommands(IRoom room);	
 	public Optional<IUser> findUser(String user_name, String user_id);
+	public Set<IUser> getRoomUsers(IRoom room);
 }

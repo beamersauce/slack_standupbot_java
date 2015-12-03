@@ -24,6 +24,7 @@ public class CommandManager implements ICommandManager {
 		this.chat_client = chat_client;
 		this.bot = bot;
 		this.data_manager = data_manager;
+		//TODO start up bot manager in rooms it was in last time
 	}
 
 	@Override
@@ -75,6 +76,8 @@ public class CommandManager implements ICommandManager {
 		return Optional.ofNullable(chat_client.findUser(user_name, user_id));
 	}
 
-	
-
+	@Override
+	public Set<IUser> getRoomUsers(final IRoom room) {
+		return chat_client.getRoomUsers(room);
+	}
 }

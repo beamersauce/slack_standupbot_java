@@ -18,8 +18,8 @@ public class HelpCommand implements ICommand {
 	}
 
 	@Override
-	public String trigger_word() {
-		return "help";
+	public Optional<String> trigger_word() {
+		return Optional.of("help");
 	}
 
 	@Override
@@ -58,7 +58,13 @@ public class HelpCommand implements ICommand {
 
 	@Override
 	public String help_message() {
-		return MessageUtils.createDefaultCommandHelpMessage(Optional.of(trigger_word()), new String[0], "displays all commands help page");
+		return MessageUtils.createDefaultCommandHelpMessage(trigger_word(), new String[0], "displays all commands help page");
+	}
+
+	@Override
+	public void intialize(ICommandManager command_manager, IRoom room) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

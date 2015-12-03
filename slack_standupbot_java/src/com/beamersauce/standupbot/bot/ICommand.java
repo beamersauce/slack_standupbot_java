@@ -4,11 +4,13 @@ import java.util.Optional;
 
 public interface ICommand {
 	public String id();
-	public String trigger_word();
+	public Optional<String> trigger_word();
 	public boolean enabled();
 	public boolean receive_full_chat_stream();
 	//TODO some permission settings?
 	//TODO some scheduling settings if necessary?
+	
+	public void intialize(ICommandManager command_manager, IRoom room);
 	
 	public void onNewMessage(ICommandManager command_manager, IRoom room, IUser user, String message);
 	/**

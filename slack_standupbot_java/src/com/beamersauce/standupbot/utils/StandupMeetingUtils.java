@@ -122,7 +122,10 @@ public class StandupMeetingUtils {
 	public static Set<IUser> getRemainingUsers(final IRoom room, final ICommandManager command_manager) {
 		final Map<String, String> standup = getStandup(room, command_manager.getDataManager(room));
 		logger.debug("Standup: " + standup.keySet());
-		final Set<IUser> room_users = command_manager.getRoomUsers(room).stream().filter(u->!u.nickname().equals(UserUtils.getBotNickname())).collect(Collectors.toSet());
+		final Set<IUser> room_users = command_manager.getRoomUsers(room).stream()
+				.filter(u->!u.nickname().equals(UserUtils.getBotNickname())) //filter out bot
+				.filter(u -> command_manager.isUserActive(u)) //filter out non-active users
+				.collect(Collectors.toSet());
 		logger.debug("Room: " + room_users.stream().map(u->u.nickname()).collect(Collectors.toList()));
 		final Set<String> blacklist_user_ids = BlacklistCommand.getCurrentBlacklist(room, command_manager.getDataManager(room));
 		logger.debug("Blacklist: " + blacklist_user_ids);
@@ -152,6 +155,7 @@ public class StandupMeetingUtils {
 			cal.set(Calendar.AM_PM, Calendar.AM);
 		}
 		cal.set(Calendar.MINUTE, meeting.minute_to_run);
+		cal.set(Calendar.MILLISECOND, 0);
 		if ( cal.getTime().getTime() < System.currentTimeMillis() )
 		{
 			//add a day, we are past todays standup time

@@ -11,7 +11,7 @@ public interface IDataManager {
 	public Map<String, Object> get_shared_room_data(IRoom room);
 	//get/set room command data
 	public void set_command_data(ICommand command, IRoom room, Map<String, Object> data);
-	public Object get_command_data(ICommand command, IRoom room); //if null return all room data
+	public Map<String, Object> get_command_data(ICommand command, IRoom room); //if null return all room data
 	
 	/**
 	 * Data is organized in a structure that allows 3 tiers of data storage/retrieval.

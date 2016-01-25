@@ -12,4 +12,5 @@ public interface ICommandManager {
 	public Set<ICommand> getRoomCommands(IRoom room);	
 	public Optional<IUser> findUser(String user_name, String user_id);
 	public Set<IUser> getRoomUsers(IRoom room);
+	public boolean isUserActive(IUser user);
 }

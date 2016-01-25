@@ -1,8 +1,10 @@
 package com.beamersauce.standupbot.bot;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface IChatClient {
+	public Optional<IRoom> findRoom(Optional<String> room_id, Optional<String> room_name);
 	public boolean joinRoom(IRoom room);
 	public boolean leaveRoom(IRoom room);
 	public void sendMessage(IRoom room, String message);
@@ -17,4 +19,5 @@ public interface IChatClient {
 	public String createUserTag(IUser user);
 	public IUser findUser(String user_name, String user_id);
 	public Set<IUser> getRoomUsers(IRoom room);
+	public boolean isUserActive(final IUser user);
 }

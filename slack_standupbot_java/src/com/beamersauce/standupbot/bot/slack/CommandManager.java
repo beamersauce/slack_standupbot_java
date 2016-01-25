@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.beamersauce.standupbot.bot.IBot;
 import com.beamersauce.standupbot.bot.IChatClient;
 import com.beamersauce.standupbot.bot.ICommand;
@@ -12,11 +15,13 @@ import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IDataManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
+import com.beamersauce.standupbot.utils.RoomUtils;
 
 public class CommandManager implements ICommandManager {	
+	private static Logger logger = LogManager.getLogger();
 	private IChatClient chat_client;
 	private IBot bot;
-	private Map<String, RoomCommandManager> room_managers = new HashMap<String, RoomCommandManager>();
+	private static Map<String, RoomCommandManager> room_managers = new HashMap<String, RoomCommandManager>();
 	private IDataManager data_manager;
 	
 	@Override
@@ -24,7 +29,13 @@ public class CommandManager implements ICommandManager {
 		this.chat_client = chat_client;
 		this.bot = bot;
 		this.data_manager = data_manager;
-		//TODO start up bot manager in rooms it was in last time
+		//start up bot manager in rooms it was in last time
+		RoomUtils.getPreviousAccessedRooms(data_manager).stream().forEach(room_id-> {
+			logger.debug("trying to find room: " + room_id);
+			final Optional<IRoom> room = chat_client.findRoom(Optional.of(room_id), Optional.empty());
+			if ( room.isPresent() )
+				getOrCreateRoomManager(room.get());
+		});
 	}
 
 	@Override
@@ -50,8 +61,10 @@ public class CommandManager implements ICommandManager {
 		//room manager didn't exist, create it		
 		final RoomCommandManager room_manager = new RoomCommandManager(room, chat_client, this, data_manager);
 		room_managers.put(room.name(), room_manager);
-		return room_manager;
-		
+		room_manager.initalize();
+		//make sure an entry is in globals
+		RoomUtils.addPreviouslyAccessRoom(room, data_manager);
+		return room_manager;		
 	}
 
 	@Override
@@ -79,5 +92,10 @@ public class CommandManager implements ICommandManager {
 	@Override
 	public Set<IUser> getRoomUsers(final IRoom room) {
 		return chat_client.getRoomUsers(room);
+	}
+	
+	@Override
+	public boolean isUserActive(final IUser user) {
+		return chat_client.isUserActive(user);
 	}
 }

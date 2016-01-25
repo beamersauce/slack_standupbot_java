@@ -94,147 +94,33 @@ public class MeetingInterceptorCommand implements ICommand {
 		return null;
 	}
 	
-	public static void addMeetingActor(final ICommandManager command_manager, final IRoom room, final Meeting meeting) {
+	public static void addMeetingActor(final ICommandManager command_manager, final IRoom room, final Meeting meeting, Optional<Boolean> silentStartup) {
 		if (!meeting_actors.containsKey(room.id())) {
 			logger.debug("Added meeting actor for room: " + room.name());
 			meeting_actors.put(room.id(), new MeetingActor(command_manager, room));			
 		}
 		logger.debug("changed meeting time, sent to actor");
-		meeting_actors.get(room.id()).changeMeetingTime(meeting);
+		meeting_actors.get(room.id()).changeMeetingTime(meeting, silentStartup);
+	}
+	
+	public static Instant getMeetingTime(final IRoom room) {
+		if (!meeting_actors.containsKey(room.id())) {
+			return null; //or something no meeting scheduled here		
+		}
+		
+		return meeting_actors.get(room.id()).getNextMeetingTime();
+	}
+	
+	public static Meeting getMeeting(final IRoom room) {
+		if (!meeting_actors.containsKey(room.id())) {
+			return null; //or something no meeting scheduled here		
+		}
+		
+		return meeting_actors.get(room.id()).getMeeting();
 	}
 	
 	public static void removeMeetingActor(final IRoom room) {		
 		meeting_actors.remove(room.id());		
 	}
-
-	//TODO probably get rid of this
-//	public static class ScheduledMeetingCheckerRunnable implements Runnable {
-//		private final MeetingInterceptorCommand interceptor;
-//		private final ICommandManager command_manager;
-//		private final IRoom room;
-//		private Meeting last_known_meeting = null;		
-//		
-//		public ScheduledMeetingCheckerRunnable(final MeetingInterceptorCommand intercepter, final ICommandManager command_manager, IRoom room) {
-//			this.interceptor = intercepter;
-//			this.command_manager = command_manager;
-//			this.room = room;
-//		}
-//		
-//		@Override
-//		public void run() {
-//			_logger.debug("Checking if meeting changed in room: " + room.name());
-//			//checks the DB for a new meeting time
-//			if ( command_manager.getDataManager(room).get_shared_room_data(room).containsKey("meeting") ) {
-//				final Meeting meeting = (Meeting) command_manager.getDataManager(room).get_shared_room_data(room).get("meeting");
-//				//see if this meeting is different from our last
-//				if ( last_known_meeting == null ) {
-//					last_known_meeting = meeting;
-//					interceptor.setupNextMeeting(command_manager, room, last_known_meeting);
-//				} else if ( !meeting.equals(last_known_meeting) ) {
-//					//something changed, reschedule
-//					last_known_meeting = meeting;
-//					interceptor.setupNextMeeting(command_manager, room, last_known_meeting);
-//				}
-//			} else if ( last_known_meeting != null ) {
-//				//meeting no longer exists, cancel an existing meeting if one is scheduled				
-//				last_known_meeting = null;
-//				interceptor.setupNextMeeting(command_manager, room, last_known_meeting);				
-//			}
-//		}
-//		
-//	}	
-//	
-//	public Instant setupNextMeeting(final ICommandManager command_manager, final IRoom room, final Meeting meeting) {
-//		//cancel any previously running timers
-//		timer_standup.cancel(); 
-//		timer_standup = new Timer();
-//		timer_warning.cancel();
-//		timer_warning = new Timer();
-//		if ( meeting != null ) {
-//			//figure out when next meeting should be
-//			final Instant nextStandupTime = MeetingInterceptorCommand.getNextStandupTime(meeting);
-//			//set up a scheduler to run the next standup at this time					
-//			timer_standup.schedule(new StandupTask(this, command_manager, room), new Date(nextStandupTime.toEpochMilli()));
-//			//set up a scheduler to run the warning if its set at x min before the next meeting
-//			setWarningTimer(command_manager, room, nextStandupTime);			
-//			return nextStandupTime;
-//		}
-//		return null;
-//	}
-//	
-//	private void setWarningTimer(ICommandManager command_manager, IRoom room, Instant nextStandupTime) {		
-//		//check if we have a warning
-//		final Optional<Integer> warning_min = WarningCommand.getWarningMinutes(room, command_manager.getDataManager(room));
-//		if ( warning_min.isPresent() ) {
-//			timer_warning.schedule(new WarningTask(command_manager, room, warning_min.get()), new Date(nextStandupTime.minus(warning_min.get(), ChronoUnit.MINUTES).toEpochMilli()));
-//		}		
-//	}
-//
-//	//TODO change this to use instant if we are capable of that?  See what the latest standard is
-//	private static Instant getNextStandupTime(final Meeting meeting) {			
-//		Calendar cal = Calendar.getInstance();
-//		cal.set(Calendar.SECOND, 0);
-//		cal.set(Calendar.HOUR, meeting.hour_to_run%12); //TODO this is on 12h need to handle to get proper time
-//		if ( meeting.hour_to_run > 11)
-//		{
-//			cal.set(Calendar.AM_PM, Calendar.PM);
-//		} else {
-//			cal.set(Calendar.AM_PM, Calendar.AM);
-//		}
-//		cal.set(Calendar.MINUTE, meeting.minute_to_run);
-//		if ( cal.getTime().getTime() < new Date().getTime() )
-//		{
-//			//add a day, we are past todays standup time
-//			cal.add(Calendar.DATE, 1);
-//		}
-//		if ( meeting.days_of_week_indexes.size() > 0 ) {
-//			while ( !meeting.days_of_week_indexes.contains(cal.get(Calendar.DAY_OF_WEEK)-1)) {
-//				//keep adding days until we get to one we can run
-//				cal.add(Calendar.DATE, 1);
-//			}
-//		}
-//		Date date = cal.getTime();
-//		return date.toInstant();
-//	}	
-//	
-//	private class StandupTask extends TimerTask {
-//		private final MeetingInterceptorCommand interceptor;
-//		private final ICommandManager command_manager;
-//		private final IRoom room;
-//		
-//		public StandupTask(final MeetingInterceptorCommand interceptor, final ICommandManager command_manager, final IRoom room) {
-//			this.interceptor = interceptor;
-//			this.command_manager = command_manager;
-//			this.room = room;
-//		}
-//		
-//		@Override
-//		public void run() {
-//			//TODO time for standup
-//			command_manager.sendMessage(room, "Time for standup, TODO");			
-//			//TODO reschedule next standup when done
-//			//set things in interceptor to handle triggers?
-//		}		
-//	}
-//	
-//	private class WarningTask extends TimerTask {
-//		private final ICommandManager command_manager;
-//		private final IRoom room;
-//		private final Integer minutes;
-//		
-//		public WarningTask(final ICommandManager command_manager, final IRoom room, final Integer minutes) {
-//			this.command_manager = command_manager;
-//			this.room = room;
-//			this.minutes = minutes;
-//		}
-//		
-//		@Override
-//		public void run() {
-//			final Set<String> blacklist_users = UserUtils.convertSetOfUserIDToNicknames(new HashSet<String>(BlacklistCommand.getCurrentBlacklist(room, command_manager.getDataManager(room))), command_manager, true);
-//			final Map<String, String> early_standup_users = UserUtils.convertMapOfUserIDToNicknames(EarlyStandupCommand.getEarlyStandup(room, command_manager.getDataManager(room)), command_manager, true);
-//			//TODO convert these 2 lists to have the tagged nicknames
-//			command_manager.sendMessage(room, StandupMeetingUtils.getWarningMessage(minutes, blacklist_users.stream().collect(Collectors.toList()), early_standup_users));			
-//		}		
-//	}
 
 }

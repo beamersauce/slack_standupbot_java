@@ -2,6 +2,7 @@ package com.beamersauce.standupbot.bot.slack;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
 import com.ullink.slack.simpleslackapi.SlackChannel;
+import com.ullink.slack.simpleslackapi.SlackPersona.SlackPresence;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
@@ -82,6 +84,26 @@ public class SlackChatClient implements IChatClient {
 		}
 		return new HashSet<IUser>();
 	}
+
+	@Override
+	public Optional<IRoom> findRoom(Optional<String> room_id, Optional<String> room_name) {
+		if ( room_id.isPresent() ) {
+			final SlackChannel channel = slack_session.findChannelById(room_id.get());
+			if ( channel != null )
+				return Optional.of(new DefaultRoom(channel.getId(), channel.getName()));
+		}
+		if ( room_name.isPresent() ) {
+			final SlackChannel channel = slack_session.findChannelByName(room_name.get());
+			if ( channel != null )
+				return Optional.of(new DefaultRoom(channel.getId(), channel.getName()));
+		}
+		return Optional.empty();
+	}
 	
+	@Override
+	public boolean isUserActive(final IUser user) {
+		final SlackUser slack_user = slack_session.findUserById(user.id());
+		return slack_session.getPresence(slack_user) == SlackPresence.ACTIVE;
+	}
 
 }

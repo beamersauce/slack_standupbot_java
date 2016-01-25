@@ -40,6 +40,13 @@ public class RoomCommandManager {
 		this.chat_client = chat_client;
 		this.command_manager = command_manager;
 		this.data_manager = data_manager;
+		
+		//put an entry in global		
+	}
+	
+
+
+	public void initalize() {
 		initCommands();
 	}
 	

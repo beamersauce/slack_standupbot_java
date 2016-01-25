@@ -27,6 +27,8 @@ import com.beamersauce.standupbot.bot.IUser;
 import com.beamersauce.standupbot.commands.meeting.MeetingActor;
 import com.beamersauce.standupbot.utils.StandupMeetingUtils;
 import com.beamersauce.standupbot.utils.UserUtils;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Handles scheduling a meeting, puts meeting information into DB for other
@@ -40,10 +42,20 @@ public class MeetingCommand implements ICommand {
 	private static final Logger _logger = LogManager.getLogger();
 	private Timer timer_standup = new Timer();
 	private Timer timer_warning = new Timer();
-	private Optional<Instant> next_meeting_time = Optional.empty();
 	
 	public MeetingCommand() {
+		
+	}
+
+	@Override
+	public void intialize(ICommandManager command_manager, IRoom room) {
 		//TODO on startup, turn on necessary meeting actors that were previously setup
+		Map<String, Object> data = command_manager.getDataManager(room).get_command_data(this, room);
+		if ( !data.isEmpty() ) {
+			final ObjectMapper mapper = new ObjectMapper();
+			final Meeting meeting = mapper.convertValue(data, Meeting.class);
+			setupMeeting(meeting, command_manager, room, Optional.of(true));
+		}
 	}
 	
 	@Override
@@ -71,7 +83,7 @@ public class MeetingCommand implements ICommand {
 			IUser user, String message) {
 		String[] args = message.split("\\s+");		
 		if ( args.length < 6 ) {
-			command_manager.sendMessage(room, "Wrong number of arguments for command [meeting] expects [meeting] [days_of_week] [hour] [minute] [regular|summary]");
+			command_manager.sendMessage(room, "Wrong number of arguments for command [meeting] expects [meeting] [days_of_week] [hour] [minute] [normal|summary]");
 		} else {
 			//parse the pieces up
 			//0 == standup
@@ -79,21 +91,57 @@ public class MeetingCommand implements ICommand {
 			//2 == days_of_week 0123456
 			//3 == hour [0-23]
 			//4 == minute [0-59]
-			//5 == regular|summary
-			final Meeting meeting = new Meeting(args[2], args[3], args[4], args[5]);
-			MeetingInterceptorCommand.addMeetingActor(command_manager, room, meeting);			
+			//5 == normal|summary
+			final Meeting meeting = new Meeting(args[2], args[3], args[4], args[5]);	
+			setupMeeting(meeting, command_manager, room, Optional.of(false));					
 			
-			
+			//save meeting time to storage
+			ObjectMapper mapper = new ObjectMapper();			
+			Map<String, Object> data = mapper.convertValue(meeting, Map.class);
+			command_manager.getDataManager(room).set_command_data(this, room, data);
 //			next_meeting_time = Optional.of(setupNextMeeting(command_manager, room, meeting));
 //			command_manager.sendMessage(room, "Next meeting scheduled for: " + new Date(next_meeting_time.get().toEpochMilli()).toString());
 		}
 		//TODO add a way to turn off meetings
 	}
+	
+	private void setupMeeting(final Meeting meeting, final ICommandManager command_manager, final IRoom room, Optional<Boolean> silentStartup) {
+		MeetingInterceptorCommand.addMeetingActor(command_manager, room, meeting, silentStartup);
+	}
 
 	@Override
-	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {		
-		//TODO fix this
-		return Optional.of("[meeting] - TODO FIX THIS Meetings are scheduled MTWRF at 9:30. This is a summary|normal room.  Next meeting is " + next_meeting_time.map(d -> d.toString()).orElse("never"));  		
+	public Optional<String> display_message(ICommandManager command_manager, IRoom room) {
+		final Meeting meeting = MeetingInterceptorCommand.getMeeting(room);
+		final Instant next_meeting_time = MeetingInterceptorCommand.getMeetingTime(room);
+		if ( meeting == null )
+			return Optional.of("No meeting scheduled");
+		else
+			return Optional.of(new StringBuilder("Meetings are scheduled ")
+				.append(getMeetingDays(meeting))
+				.append(" at ")
+				.append(meeting.hour_to_run).append(":").append(meeting.minute_to_run)
+				.append(". Next meeting is at ")
+				.append(next_meeting_time)
+				.toString());			
+	}
+
+	private String getMeetingDays(final Meeting meeting) {
+		String days = "";
+		if ( meeting.days_of_week_indexes.contains(0) )
+			days += "Su";
+		if ( meeting.days_of_week_indexes.contains(1) )
+			days += "M";
+		if ( meeting.days_of_week_indexes.contains(2) )
+			days += "T";
+		if ( meeting.days_of_week_indexes.contains(3) )
+			days += "W";
+		if ( meeting.days_of_week_indexes.contains(4) )
+			days += "R";
+		if ( meeting.days_of_week_indexes.contains(5) )
+			days += "F";
+		if ( meeting.days_of_week_indexes.contains(6) )
+			days += "Sa";
+		return days;		
 	}
 
 	@Override
@@ -106,6 +154,10 @@ public class MeetingCommand implements ICommand {
 		public int hour_to_run;
 		public int minute_to_run;
 		public MeetingType meeting_type;
+		
+		public Meeting(){
+			//jackson ctor
+		}
 		
 		public Meeting(String days_of_week, String hour, String minute, String meeting_type) {
 			for ( char day : days_of_week.toCharArray() ) {
@@ -136,6 +188,14 @@ public class MeetingCommand implements ICommand {
 				//just ignore bad things
 				//TODO don't ignore, fail
 			}
+			try {
+				this.meeting_type = MeetingType.valueOf(meeting_type);
+			} catch (Exception ex) {
+				//just ignore bad things
+				//TODO don't ignore, fail
+				this.meeting_type = MeetingType.normal;
+			}
+			
 		}
 		
 		@Override
@@ -153,7 +213,8 @@ public class MeetingCommand implements ICommand {
 	}
 	
 	public enum MeetingType {
-		summary, normal
+		summary,
+		normal
 	}
 	
 	private Instant setupNextMeeting(final ICommandManager command_manager, final IRoom room, final Meeting meeting) {
@@ -249,12 +310,6 @@ public class MeetingCommand implements ICommand {
 			//TODO convert these 2 lists to have the tagged nicknames
 			command_manager.sendMessage(room, StandupMeetingUtils.getWarningMessage(minutes, blacklist_users.stream().collect(Collectors.toList()), early_standup_users));			
 		}		
-	}
-
-	@Override
-	public void intialize(ICommandManager command_manager, IRoom room) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

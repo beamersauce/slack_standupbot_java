@@ -76,11 +76,13 @@ public class FileDataManager implements IDataManager {
 	public void set_command_data(ICommand command, IRoom room,
 			Map<String, Object> data) {
 		this.data._rooms.get(room.id())._commands.put(command.id(), data); 
+		write_data_to_disk();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object get_command_data(ICommand command, IRoom room) {
-		return this.data
+	public Map<String, Object> get_command_data(ICommand command, IRoom room) {
+		return (Map<String, Object>) this.data
 				._rooms.getOrDefault(room.id(), new DefaultRoomData())
 				._commands.getOrDefault(command.id(), new HashMap<String, Object>());
 	}

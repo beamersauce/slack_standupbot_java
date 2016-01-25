@@ -57,6 +57,8 @@ public class MeetingActor {
 	 * Kill any active meeting, turn off all timers so this class can be destroyed.
 	 */
 	public void stop() {
+		logger.debug("Setting isMeetingTime to false in stop()");
+		isMeetingTime = false;
 		if ( next_scheduled_task != null ) {
 			next_scheduled_task.cancel(true);
 			next_meeting = null;
@@ -114,11 +116,13 @@ public class MeetingActor {
 //		currentUsersTurn = null;
 		currentUsersTurn = remaining_users.size() > 0 ? remaining_users.stream().findFirst().get() : null;
 		if ( currentUsersTurn == null ) {
+			logger.debug("Meeting over, sending summary, turning isMeetingTime off");
 			//meeting is over now, clea everything we no longer need
+			logger.debug("Setting isMeetingTime to false in getNextUser()");
 			isMeetingTime = false;
 			next_timeout_task = null;
 			command_manager.sendMessage(room, StandupMeetingUtils.getSummaryMessage(room, command_manager.getDataManager(room)));
-			scheduleNextMeeting();
+			scheduleNextMeeting(Optional.of(false));
 		} else {
 			//start timers
 			command_manager.sendMessage(room, "Your turn <@" + currentUsersTurn.nickname() + ">");
@@ -129,8 +133,9 @@ public class MeetingActor {
 	public void startMeeting() {		
 		command_manager.sendMessage(room, "<@channel> Time for standup!");
 		command_manager.sendMessage(room, "Use 'today' in a sentence or end your statement with ['done', 'done.'] to end your turn.");
-		getNextUser(false, false);
+		logger.debug("Setting isMeetingTime to true in startMeeting()");
 		isMeetingTime = true;
+		getNextUser(false, false);		
 	}
 
 	final Pattern done_pattern = Pattern.compile("today|(done?.$)", Pattern.CASE_INSENSITIVE);
@@ -151,12 +156,20 @@ public class MeetingActor {
 	 * 
 	 * @param meeting
 	 */
-	public void changeMeetingTime(final Meeting meeting) {
+	public void changeMeetingTime(final Meeting meeting, Optional<Boolean> silentStartup) {
 		this.meeting = meeting;
-		scheduleNextMeeting();		
+		scheduleNextMeeting(silentStartup);		
+	}
+	
+	public Instant getNextMeetingTime() {
+		return this.next_meeting;
+	}
+	
+	public Meeting getMeeting() {
+		return this.meeting;
 	}
 
-	private void scheduleNextMeeting() {
+	private void scheduleNextMeeting(Optional<Boolean> silentStartup) {
 		stop();
 		StandupMeetingUtils.clearStandup(room, command_manager.getDataManager(room));
 		this.next_meeting = StandupMeetingUtils.getNextStandupTime(meeting);
@@ -171,8 +184,9 @@ public class MeetingActor {
 			this.next_warning_task = scheduler_warning.schedule(new WarningRunnable(room, command_manager), warning_delay, TimeUnit.SECONDS);
 		}
 		logger.debug("scheduled next meeting");
-		//send message to room
-		command_manager.sendMessage(room, "Next meeting scheduled for: " + next_meeting);
+		//send message to room, if we aren't starting up in silentmode
+		if ( !silentStartup.isPresent() || !silentStartup.get())
+			command_manager.sendMessage(room, "Next meeting scheduled for: " + next_meeting);
 	}
 	
 	private class MeetingRunnable implements Runnable {

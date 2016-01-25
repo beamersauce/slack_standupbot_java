@@ -26,10 +26,6 @@ public class DefaultBot implements IBot {
 		
 		this.bot_user = chat_client.findUser("standupbot", null);
 		command_manager.start(this, chat_client, data_manager);
-		//join all previous rooms (if necessary)
-		//TODO get this from the data_manager
-		//chat_client.joinRoom("bot_dev");
-		
 	}
 
 	@Override

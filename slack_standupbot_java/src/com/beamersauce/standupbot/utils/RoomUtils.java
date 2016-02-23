@@ -1,9 +1,6 @@
 package com.beamersauce.standupbot.utils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.beamersauce.standupbot.bot.IDataManager;
@@ -31,5 +28,9 @@ public class RoomUtils {
 		previous_rooms.add(room.id());
 		global_data.put(STORED_ROOM_IDS, previous_rooms);
 		data_manager.set_global_shared_data(global_data);
+	}
+
+	public static Optional<IRoom> findRoom(final String room_name) {
+		return Optional.empty();
 	}
 }

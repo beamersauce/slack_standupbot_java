@@ -10,7 +10,7 @@ public interface ICommand {
 	//TODO some permission settings?
 	//TODO some scheduling settings if necessary?
 	
-	public void intialize(ICommandManager command_manager, IRoom room);
+	public void initialize(ICommandManager command_manager, IRoom room);
 	
 	public void onNewMessage(ICommandManager command_manager, IRoom room, IUser user, String message);
 	/**

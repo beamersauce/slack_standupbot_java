@@ -48,7 +48,7 @@ public class MeetingInterceptorCommand implements ICommand {
 	private static Map<String, MeetingActor> meeting_actors = new HashMap<String, MeetingActor>();
 	
 	@Override
-	public void intialize(ICommandManager command_manager, IRoom room) {
+	public void initialize(ICommandManager command_manager, IRoom room) {
 		//setup meeting check event
 //		scheduler.scheduleAtFixedRate(new ScheduledMeetingCheckerRunnable(this, command_manager, room), 5, 5, TimeUnit.SECONDS);
 		

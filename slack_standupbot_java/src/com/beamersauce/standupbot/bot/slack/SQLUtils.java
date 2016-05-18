@@ -41,20 +41,46 @@ public class SQLUtils {
 		logger.debug("inserted item successfully");
 	}
 	
-	public static Map<String, Object> getData(final Connection conn, final String table_name, final String id) throws SQLException, JsonProcessingException, IOException {
+	public static Map<String, Object> getData(final Connection conn, final String table_name, final String id) throws SQLException, JsonProcessingException, IOException {	
+		return getData(conn, "*", 2, table_name, id);
+	}
+	
+	public static Map<String, Object> getData(final Connection conn, final String fields, final int column, final String table_name, final String id) throws SQLException, JsonProcessingException, IOException {
 		final Statement stmt_select = conn.createStatement();
-		final String sql_select = "SELECT * FROM " + table_name + " WHERE "+id+";";
+		final String sql_select = "SELECT " + fields + " FROM " + table_name + " WHERE "+id+";";
 		logger.debug("SELECT: " + sql_select);
 		ResultSet rs = stmt_select.executeQuery(sql_select);
 		Map<String, Object> data = null;
 		while ( rs.next() ) {			
-			final String text_data = rs.getString(2);
+			final String text_data = rs.getString(column);
 			logger.debug("QUERY: " + text_data);
 			data = convertStringToMap(text_data);
 		}
 		rs.close();
 		stmt_select.close();
 		return data;		
+	}
+	
+	public static boolean doesTableExist(final Connection conn, final String table_name) throws JsonProcessingException, SQLException, IOException {
+		final Statement stmt_select = conn.createStatement();
+		final String sql_select = "SELECT name FROM sqlite_master WHERE type='table' AND name='" + table_name + "';";
+		logger.debug("TABLE_EXIST: " + sql_select);
+		ResultSet rs = stmt_select.executeQuery(sql_select);
+		boolean hasResult = false;
+		while ( rs.next() ) {	
+			hasResult = true;
+		}
+		rs.close();
+		stmt_select.close();
+		return hasResult;
+	}
+
+	public static void deleteTable(final Connection conn, final String table_name) throws SQLException {
+		final String sql_delete = "DROP TABLE " + table_name;
+		final Statement stmt_delete = conn.createStatement();
+		stmt_delete.executeUpdate(sql_delete);
+		stmt_delete.close();
+		logger.debug("deleted table: " + table_name + " successfully");
 	}
 	
 	private static Map<String, Object> convertStringToMap(final String text_data) throws JsonProcessingException, IOException {

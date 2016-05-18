@@ -3,3 +3,8 @@
 .classpath
 .project
 .settings/
+/config/
+/save_data/
+/example_config/
+standupbot_db
+test_db

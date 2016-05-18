@@ -99,7 +99,7 @@ public class WarningCommand implements ICommand {
 	}
 
 	@Override
-	public void intialize(ICommandManager command_manager, IRoom room) {
+	public void initialize(ICommandManager command_manager, IRoom room) {
 		// TODO Auto-generated method stub
 		
 	}

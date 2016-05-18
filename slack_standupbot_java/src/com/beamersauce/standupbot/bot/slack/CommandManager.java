@@ -98,4 +98,7 @@ public class CommandManager implements ICommandManager {
 	public boolean isUserActive(final IUser user) {
 		return chat_client.isUserActive(user);
 	}
+
+	@Override
+	public Optional<IRoom> findRoom(final String room_name) { return chat_client.findRoom(Optional.empty(), Optional.of(room_name)); }
 }

@@ -48,7 +48,7 @@ public class MeetingCommand implements ICommand {
 	}
 
 	@Override
-	public void intialize(ICommandManager command_manager, IRoom room) {
+	public void initialize(ICommandManager command_manager, IRoom room) {
 		//TODO on startup, turn on necessary meeting actors that were previously setup
 		Map<String, Object> data = command_manager.getDataManager(room).get_command_data(this, room);
 		if ( !data.isEmpty() ) {

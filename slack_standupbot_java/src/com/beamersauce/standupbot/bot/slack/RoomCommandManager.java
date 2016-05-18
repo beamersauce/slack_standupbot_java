@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.beamersauce.standupbot.commands.meeting.SpeakCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,6 +63,7 @@ public class RoomCommandManager {
 		addCommand(new EarlyStandupCommand());
 		addCommand(new WarningCommand());
 		addCommand(new MeetingInterceptorCommand());
+		addCommand(new SpeakCommand());
 	}
 	
 	private void addCommand(ICommand command) {
@@ -74,8 +76,8 @@ public class RoomCommandManager {
 			System.out.println("Added trigger word: " + command.trigger_word().get().toLowerCase());
 			trigger_commands.put(command.trigger_word().get().toLowerCase(), command);
 		}
-		//intialize the command
-		command.intialize(command_manager, room);
+		//initialize the command
+		command.initialize(command_manager, room);
 	}
 
 	public void onReceiveMessage(IUser user, IRoom room, String message) {

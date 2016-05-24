@@ -2,19 +2,14 @@ package com.beamersauce.standupbot.commands;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -24,10 +19,8 @@ import com.beamersauce.standupbot.bot.ICommand;
 import com.beamersauce.standupbot.bot.ICommandManager;
 import com.beamersauce.standupbot.bot.IRoom;
 import com.beamersauce.standupbot.bot.IUser;
-import com.beamersauce.standupbot.commands.meeting.MeetingActor;
 import com.beamersauce.standupbot.utils.StandupMeetingUtils;
 import com.beamersauce.standupbot.utils.UserUtils;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -42,6 +35,7 @@ public class MeetingCommand implements ICommand {
 	private static final Logger _logger = LogManager.getLogger();
 	private Timer timer_standup = new Timer();
 	private Timer timer_warning = new Timer();
+	private final static ObjectMapper mapper = new ObjectMapper();
 	
 	public MeetingCommand() {
 		
@@ -95,8 +89,8 @@ public class MeetingCommand implements ICommand {
 			final Meeting meeting = new Meeting(args[2], args[3], args[4], args[5]);	
 			setupMeeting(meeting, command_manager, room, Optional.of(false));					
 			
-			//save meeting time to storage
-			ObjectMapper mapper = new ObjectMapper();			
+			//save meeting time to storage			
+			@SuppressWarnings("unchecked")
 			Map<String, Object> data = mapper.convertValue(meeting, Map.class);
 			command_manager.getDataManager(room).set_command_data(this, room, data);
 //			next_meeting_time = Optional.of(setupNextMeeting(command_manager, room, meeting));

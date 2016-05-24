@@ -1,9 +1,6 @@
 package com.beamersauce.standupbot.commands;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

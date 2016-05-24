@@ -1,9 +1,6 @@
 package com.beamersauce.standupbot.bot.slack;
 
-import java.util.Set;
-
 import com.beamersauce.standupbot.bot.IRoom;
-import com.beamersauce.standupbot.bot.IUser;
 
 public class DefaultRoom implements IRoom {
 	private final String id;

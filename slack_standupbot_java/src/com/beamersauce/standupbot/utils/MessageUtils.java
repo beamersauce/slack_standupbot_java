@@ -13,13 +13,14 @@ public class MessageUtils {
 	 * @return
 	 */
 	public static String createDefaultCommandHelpMessage(final Optional<String> trigger_word, final String[] arg_names, final String message) {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder("\"");
 		if ( trigger_word.isPresent() ) {
-			sb.append("\"[").append(trigger_word.get()).append("]");
-		}
+			sb.append("[").append(trigger_word.get()).append("] ");
+		} 
 		for ( String arg_name : arg_names ) {
-			sb.append(" [").append(arg_name).append("]");
+			sb.append("[").append(arg_name).append("] ");
 		}
+		sb.deleteCharAt(sb.length()-1);
 		sb.append("\" - ").append(message);
 		return sb.toString();
 	}

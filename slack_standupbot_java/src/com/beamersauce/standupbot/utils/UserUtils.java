@@ -7,7 +7,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.beamersauce.standupbot.bot.ICommandManager;
-
+/**
+ * Collection of utils centered around the user objects.  Typically for converting
+ * from ids or nicknames to users.  
+ * @author Burch
+ *
+ */
 public class UserUtils {
 	private final static Pattern slack_tag_pattern = Pattern.compile("<@(\\w+)>");
 	/**

@@ -1,3 +1,4 @@
+package com.beamersauce.standupbot.bot.slack;
 import static org.junit.Assert.*;
 
 import java.io.IOException;

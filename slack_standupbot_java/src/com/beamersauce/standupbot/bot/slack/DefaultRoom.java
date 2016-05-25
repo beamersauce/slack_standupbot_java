@@ -2,6 +2,11 @@ package com.beamersauce.standupbot.bot.slack;
 
 import com.beamersauce.standupbot.bot.IRoom;
 
+/**
+ * Basic implementation for an IRoom, just stores the id and name.
+ * @author Burch
+ *
+ */
 public class DefaultRoom implements IRoom {
 	private final String id;
 	private final String name;	
